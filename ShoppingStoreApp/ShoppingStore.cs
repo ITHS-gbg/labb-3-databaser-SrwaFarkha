@@ -53,6 +53,33 @@ namespace ShoppingStoreApp
             var result = await db.GetAllShoppingStore();
             return result;
         }
+
+        public static async Task DeleteProductFromStoreStockBalance(ShoppingStoreModel shoppingStore, ProductModel product, int newProductValue)
+        {
+            ShoppingStoreDataAccess db = new ShoppingStoreDataAccess();
+            await db.DeleteProductFromStoreStockBalance(shoppingStore, product, newProductValue);
+        }
+
+
+        public static async Task<ShoppingStoreModel> GetShoppingStore(string shoppingStoreId)
+        {
+            ShoppingStoreDataAccess db = new ShoppingStoreDataAccess();
+            var result = await db.GetShoppingStoreById(shoppingStoreId);
+            return result;
+        }
+
+        public static async Task InsertProductToShoppingStore(ShoppingStoreModel shoppingStoreModel,
+            ProductModel productModel)
+        {
+            ShoppingStoreDataAccess db = new ShoppingStoreDataAccess(); 
+            await db.InsertProductToShoppingStore(shoppingStoreModel, productModel);
+        }
+
+        public static async Task InsertProductToProducts(ProductModel productModel)
+        {
+            ShoppingStoreDataAccess db = new ShoppingStoreDataAccess();
+            await db.CreateProduct(productModel);
+        }
     }
 }
 

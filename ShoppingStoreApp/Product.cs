@@ -20,17 +20,17 @@ namespace ShoppingStoreApp
 
             var newProducts = new List<ProductModel>
             {
-                new ProductModel("Apple", 5.0M),
-                new ProductModel("Banana", 7.0M),
-                new ProductModel("Pear", 6.0M),
-                new ProductModel("Strawberry", 1.0M),
-                new ProductModel("Melon", 10.0M),
-                new ProductModel("Kiwi", 4.0M),
-                new ProductModel("Coconut", 15.0M),
-                new ProductModel("Pineapple", 18.0M),
-                new ProductModel("Blueberries", 5.0M),
-                new ProductModel("Papaya", 5.0M),
-                new ProductModel("Passion fruit", 10.0M),
+                new ProductModel("Apple", 5.0M, 10),
+                new ProductModel("Banana", 7.0M, 10),
+                new ProductModel("Pear", 6.0M, 10),
+                new ProductModel("Strawberry", 1.0M, 10),
+                new ProductModel("Melon", 10.0M, 10),
+                new ProductModel("Kiwi", 4.0M, 10),
+                new ProductModel("Coconut", 15.0M, 10),
+                new ProductModel("Pineapple", 18.0M, 10),
+                new ProductModel("Blueberries", 5.0M, 10),
+                new ProductModel("Papaya", 5.0M, 10),
+                new ProductModel("Passion fruit", 10.0M, 10),
             };
 
             ShoppingStoreDataAccess db = new ShoppingStoreDataAccess();
@@ -40,10 +40,17 @@ namespace ShoppingStoreApp
             }
         }
 
-        private static async Task<List<ProductModel>> GetAllProducts()
+        public static async Task<List<ProductModel>> GetAllProducts()
         {
             ShoppingStoreDataAccess db = new ShoppingStoreDataAccess();
             var result = await db.GetAllProducts();
+            return result;
+        }
+
+        public static async Task<ProductModel> GetProductByName(string newProductName)
+        {
+            ShoppingStoreDataAccess db = new ShoppingStoreDataAccess();
+            var result = await db.GetProductByName(newProductName);
             return result;
         }
     }

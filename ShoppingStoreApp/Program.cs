@@ -40,7 +40,6 @@ namespace ShoppingStoreApp
                 {
                     Console.WriteLine($"{shoppingStore.Key}. {shoppingStore.Value.Name}");
                 }
-
                 Console.WriteLine("\nSelect an option");
                 Console.WriteLine("-----------------------------------");
 
@@ -52,7 +51,7 @@ namespace ShoppingStoreApp
                 {
                     if (userInputShoppingStore == shoppingStore.Key)
                     {
-                        await Customer.SignIn(shoppingStore.Value);
+                        await ShoppingStoreProcessor.ShoppingStoreStartNavigate(shoppingStore.Value);
                     }
                 }
             }

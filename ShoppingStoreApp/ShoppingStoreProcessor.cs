@@ -12,6 +12,36 @@ namespace ShoppingStoreApp
     public class ShoppingStoreProcessor
     {
 
+        public static async Task ShoppingStoreStartNavigate(ShoppingStoreModel shoppingStore)
+        {
+            while (true)
+            {
+                Console.Clear();
+                Console.WriteLine("-----------------------------------");
+                Console.WriteLine($"*** Shopping store Page ***");
+                Console.WriteLine("-----------------------------------");
+                Console.WriteLine("1) Sign in");
+                Console.WriteLine("2) Shopping management");
+
+                Console.Write("\nSelect an option, press 0 to go back: ");
+
+                switch (Console.ReadLine())
+                {
+                    case "1":
+                        await Customer.SignIn(shoppingStore);
+                        break;
+                    case "2":
+                        await ShoppingStoreManagement.ShoppingStoreManagementStartNavigate(shoppingStore);
+                        break;
+                    case "0":
+                        var shoppingStores = await ShoppingStore.GetAllShoppingStores();
+                        await Program.ChooseShoppingStoreMainMenu(shoppingStores);
+                        break;
+
+                }
+            }
+        }
+
         public static async Task ShoppingStoreMain(ShoppingStoreModel shoppingStore, CustomerModel customer)
         {
             while (true)
@@ -27,7 +57,7 @@ namespace ShoppingStoreApp
                 Console.WriteLine("3) Check out");
                 Console.WriteLine("4) Sign out");
 
-                Console.Write("\nSelect an option to buy: ");
+                Console.Write("\nSelect an option: ");
 
                 switch (Console.ReadLine())
                 {
@@ -134,10 +164,11 @@ namespace ShoppingStoreApp
                 Console.WriteLine("Add product to cart by pressing the keys");
 
 
-                var products = shoppingStore.Products;
+                var shoppingStoreFromDb = await ShoppingStore.GetShoppingStore(shoppingStore.Id);
+                
                 var counter = 1;
                 var dictionary = new Dictionary<int, ProductModel>();
-                foreach (var product in products)
+                foreach (var product in shoppingStoreFromDb.Products)
                 {
                     dictionary.Add(counter, product);
                     counter++;
@@ -145,7 +176,11 @@ namespace ShoppingStoreApp
 
                 foreach (var product in dictionary)
                 {
-                    Console.WriteLine($"{product.Key}. {product.Value.Name} {GetPriceAndConvertCurrency(product.Value.Price, customer.CurrencyType)} x {product.Value.StockBalance}");
+                    var stockBalanceText = product.Value.StockBalance <= 0
+                        ? "out of stock"
+                        : $"x {product.Value.StockBalance}";
+
+                    Console.WriteLine($"{product.Key}. {product.Value.Name} {GetPriceAndConvertCurrency(product.Value.Price, customer.CurrencyType)} {stockBalanceText}");
                 }
                 Console.WriteLine("\nSelect an option. Enter 0 to go back to shopping main menu");
                 Console.WriteLine("-----------------------------------");
@@ -163,15 +198,23 @@ namespace ShoppingStoreApp
                 {
                     if (userInputShoppingStore == product.Key)
                     {
-                        customer.ShoppingCart?.Add(product.Value);
-
-                        //WIP REMOVE PRODUCT
-                        var productToRemove = shoppingStore.Products.Find(x => x.Id == product.Value.Id);
-
-
                         await Customer.SaveProductToCustomerCart(customer);
-                        Console.WriteLine($"{product.Value.Name} is added to your shopping cart! Press any key to continue shopping!");
+                        var currentProductValue = product.Value.StockBalance - 1;
+
+                        if (currentProductValue > 0)
+                        {                        
+                            customer.ShoppingCart?.Add(product.Value);
+                            await ShoppingStore.DeleteProductFromStoreStockBalance(shoppingStore, product.Value,
+                                currentProductValue);
+                            Console.WriteLine($"{product.Value.Name} is added to your shopping cart! Press any key to continue shopping!");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"The product {product.Value.Name} is currently not in stock. Please press any key to continue shopping.");
+                        }
+
                         Console.ReadKey();
+                        break;
                     }
                 }
             }

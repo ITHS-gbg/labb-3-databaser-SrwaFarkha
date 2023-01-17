@@ -18,7 +18,7 @@ namespace ShoppingStoreApp.DataAccess.Models
 
         public int StockBalance { get; set; }
 
-        public ProductModel(string name, decimal price, int stockBalance = 10)
+        public ProductModel(string name, decimal price, int stockBalance)
         {
             Name = name;
             Price = price;
