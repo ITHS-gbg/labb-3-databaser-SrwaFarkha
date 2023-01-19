@@ -60,6 +60,11 @@ namespace ShoppingStoreApp
             await db.DeleteProductFromStoreStockBalance(shoppingStore, product, newProductValue);
         }
 
+        public static async Task DeleteProductInShoppingStore(ShoppingStoreModel shoppingStore, ProductModel product)
+        {
+            ShoppingStoreDataAccess db = new ShoppingStoreDataAccess();
+            await db.DeleteProductFromShoppingStore(shoppingStore, product);
+        }
 
         public static async Task<ShoppingStoreModel> GetShoppingStore(string shoppingStoreId)
         {
@@ -79,6 +84,14 @@ namespace ShoppingStoreApp
         {
             ShoppingStoreDataAccess db = new ShoppingStoreDataAccess();
             await db.CreateProduct(productModel);
+        }
+
+        public static async Task UpdateShoppingStoreProductStockBalance(ShoppingStoreModel shoppingStore,
+            ProductModel product, int newValue)
+        {
+            ShoppingStoreDataAccess db = new ShoppingStoreDataAccess();
+            await db.UpdateShoppingStoreProductStockBalance(shoppingStore,product,newValue);
+
         }
     }
 }

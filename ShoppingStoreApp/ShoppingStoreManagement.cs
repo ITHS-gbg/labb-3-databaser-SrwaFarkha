@@ -80,11 +80,11 @@ namespace ShoppingStoreApp
                         break;
                     case "2":
                         isContinue = false;
-                        DeleteProduct();
+                        await DeleteProduct(shoppingStore);
                         break;
                     case "3":
                         isContinue = false;
-                        EditProduct();
+                        await EditProduct(shoppingStore);
                         break;
                     case "0":
                         isContinue = false;
@@ -108,13 +108,14 @@ namespace ShoppingStoreApp
                 Console.WriteLine("------------------------------");
 
                 var shoppingStore = await ShoppingStore.GetShoppingStore(shoppingStoreModel.Id);
-                
+
                 var counter = 1;
                 foreach (var product in shoppingStore.Products)
                 {
                     Console.WriteLine($"{counter}. {product.Name}");
                     counter++;
                 }
+
                 Console.WriteLine("-----------------------------------");
                 Console.WriteLine("Please press any key to add a new product or 0 for going back");
                 var userInput = Console.ReadLine();
@@ -147,55 +148,120 @@ namespace ShoppingStoreApp
             }
         }
 
-        public static void DeleteProduct()
+        public static async Task DeleteProduct(ShoppingStoreModel shoppingStore)
         {
-            //bool isContinueDeleteBook = true;
-            //while (isContinueDeleteBook)
-            //{
-            //    Console.Clear();
-            //    Console.WriteLine("------------------------------");
+            bool isContinueDeleteProduct = true;
+            while (isContinueDeleteProduct)
+            {
+                Console.Clear();
+                Console.WriteLine("------------------------------");
+                Console.WriteLine("You are deleting products");
+                Console.WriteLine("------------------------------");
 
-            //    var counter = 1;
-            //    var books = _böckerRepository.GetAll();
-            //    var dictionary = new Dictionary<int, Böcker>();
-            //    foreach (var book in books)
-            //    {
-            //        dictionary.Add(counter, book);
-            //        counter++;
-            //    }
 
-            //    foreach (var book in dictionary)
-            //    {
-            //        Console.WriteLine($"{book.Key}. {book.Value.Titel}");
-            //    }
+                var counter = 1;
+                var shoppingStoreFromDb = await ShoppingStore.GetShoppingStore(shoppingStore.Id);
+                var dictionary = new Dictionary<int, ProductModel>();
+                foreach (var product in shoppingStoreFromDb.Products)
+                {
+                    dictionary.Add(counter, product);
+                    counter++;
+                }
 
-            //    Console.WriteLine("\nWhich book would you like to delete?");
-            //    Console.WriteLine("------------------------------");
-            //    Console.WriteLine("Go back with 'b' ");
-            //    var deleteBook = Console.ReadLine();
+                foreach (var product in dictionary)
+                {
+                    Console.WriteLine($"{product.Key}. {product.Value.Name}");
+                }
 
-            //    if (deleteBook == "b")
-            //    {
-            //        isContinueDeleteBook = false;
-            //        ShoppingStoreManagementStartNavigate();
-            //    }
+                Console.WriteLine("\nWhich product would you like to delete?");
+                Console.WriteLine("------------------------------");
+                Console.WriteLine("Go back with '0' ");
+                var deleteProduct = Console.ReadLine();
 
-            //    foreach (var item in dictionary)
-            //    {
-            //        if (deleteBook == item.Key.ToString())
-            //        {
-            //            isContinueDeleteBook = false;
-            //            _böckerRepository.DeleteBook(item.Value.Isbn13);
-            //            Console.WriteLine($"Successfully deleted '{item.Value.Titel}'. Press any key to go back.");
-            //            Console.ReadKey();
-            //            ShoppingStoreManagementStartNavigate();
-            //        }
-            //    }
-            //}
+                if (deleteProduct == "0")
+                {
+                    isContinueDeleteProduct = false;
+                    await ShoppingStoreManagementStartNavigate(shoppingStore);
+                }
+
+                foreach (var item in dictionary)
+                {
+                    if (deleteProduct == item.Key.ToString())
+                    {
+                        Console.WriteLine($"Product to delete is: {item.Value.Name}");
+                        await ShoppingStore.DeleteProductInShoppingStore(shoppingStore,item.Value);
+                        Console.WriteLine($"Successfully deleted '{item.Value.Name}'. Press any key to continue deleting products.");
+                        Console.ReadKey();
+                    }
+                }
+            }
         }
 
-        public static void EditProduct()
+        public static async Task EditProduct(ShoppingStoreModel shoppingStore)
         {
+            bool isContinueEditProduct = true;
+            while (isContinueEditProduct)
+            {
+                Console.Clear();
+                Console.WriteLine("------------------------------");
+                Console.WriteLine("You are editing products");
+                Console.WriteLine("------------------------------");
+                Console.WriteLine("Here is the product list of this shopping store");
+                Console.WriteLine("------------------------------");
+
+                var shoppingStoreFromDb = await ShoppingStore.GetShoppingStore(shoppingStore.Id);
+
+                var counter = 1;
+                var dictionary = new Dictionary<int, ProductModel>();
+                foreach (var product in shoppingStoreFromDb.Products)
+                {
+                    dictionary.Add(counter, product);
+                    counter++;
+                }
+
+                foreach (var product in dictionary)
+                {
+                    var stockBalanceText = product.Value.StockBalance <= 0
+                        ? "out of stock"
+                        : $"x {product.Value.StockBalance}";
+
+                    Console.WriteLine($"{product.Key}. {product.Value.Name} x{product.Value.StockBalance}");
+                }
+
+                Console.WriteLine("-----------------------------------");
+                Console.WriteLine("Please press any key to continue or 0 for going back");
+                var userInput = Console.ReadLine();
+                if (userInput == "0")
+                {
+                    await ShoppingStoreManagementStartNavigate(shoppingStore);
+                }
+                else
+                {
+                    Console.WriteLine("-----------------------------------");
+                    Console.Write("Please pick the product you would like to edit the stock balance of the product:");
+                    int editProduct = Convert.ToInt32(Console.ReadLine());
+
+                    foreach (var product in dictionary)
+                    {
+                        if (editProduct == product.Key)
+                        {
+                            Console.WriteLine($"{product.Value.Name} picked.");
+                            Console.WriteLine("How many of this product would you like to have?");
+                            int editAmountOfProduct = Convert.ToInt32(Console.ReadLine());
+                            await ShoppingStore.UpdateShoppingStoreProductStockBalance(shoppingStore, product.Value,editAmountOfProduct);
+
+                            Console.WriteLine("Thank you, we will change that. Press any key for going back");
+                            Console.ReadKey();
+                            break;
+                        }
+                    }
+
+                    // await db.ProductCollection.save(editProduct);
+                    
+                }
+               
+
+            }
 
         }
     }
